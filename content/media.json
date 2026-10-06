@@ -1,0 +1,362 @@
+{
+  "b2g-landing": {
+    "width": 2048,
+    "height": 1133,
+    "color": "#080808",
+    "sources": {
+      "avif": [
+        [
+          480,
+          "/media/b2g-landing-480.avif"
+        ],
+        [
+          800,
+          "/media/b2g-landing-800.avif"
+        ],
+        [
+          1200,
+          "/media/b2g-landing-1200.avif"
+        ],
+        [
+          1600,
+          "/media/b2g-landing-1600.avif"
+        ],
+        [
+          2048,
+          "/media/b2g-landing-2048.avif"
+        ]
+      ],
+      "webp": [
+        [
+          480,
+          "/media/b2g-landing-480.webp"
+        ],
+        [
+          800,
+          "/media/b2g-landing-800.webp"
+        ],
+        [
+          1200,
+          "/media/b2g-landing-1200.webp"
+        ],
+        [
+          1600,
+          "/media/b2g-landing-1600.webp"
+        ],
+        [
+          2048,
+          "/media/b2g-landing-2048.webp"
+        ]
+      ]
+    }
+  },
+  "b2g-mark": {
+    "width": 432,
+    "height": 276,
+    "color": "#080838",
+    "sources": {
+      "avif": [
+        [
+          432,
+          "/media/b2g-mark-432.avif"
+        ]
+      ],
+      "webp": [
+        [
+          432,
+          "/media/b2g-mark-432.webp"
+        ]
+      ]
+    }
+  },
+  "irrigation-enclosure": {
+    "width": 1158,
+    "height": 625,
+    "color": "#f8f8f8",
+    "sources": {
+      "avif": [
+        [
+          480,
+          "/media/irrigation-enclosure-480.avif"
+        ],
+        [
+          800,
+          "/media/irrigation-enclosure-800.avif"
+        ],
+        [
+          1158,
+          "/media/irrigation-enclosure-1158.avif"
+        ]
+      ],
+      "webp": [
+        [
+          480,
+          "/media/irrigation-enclosure-480.webp"
+        ],
+        [
+          800,
+          "/media/irrigation-enclosure-800.webp"
+        ],
+        [
+          1158,
+          "/media/irrigation-enclosure-1158.webp"
+        ]
+      ]
+    }
+  },
+  "paev-dashboard": {
+    "width": 2532,
+    "height": 1399,
+    "color": "#080818",
+    "sources": {
+      "avif": [
+        [
+          480,
+          "/media/paev-dashboard-480.avif"
+        ],
+        [
+          800,
+          "/media/paev-dashboard-800.avif"
+        ],
+        [
+          1200,
+          "/media/paev-dashboard-1200.avif"
+        ],
+        [
+          1600,
+          "/media/paev-dashboard-1600.avif"
+        ],
+        [
+          2400,
+          "/media/paev-dashboard-2400.avif"
+        ],
+        [
+          2532,
+          "/media/paev-dashboard-2532.avif"
+        ]
+      ],
+      "webp": [
+        [
+          480,
+          "/media/paev-dashboard-480.webp"
+        ],
+        [
+          800,
+          "/media/paev-dashboard-800.webp"
+        ],
+        [
+          1200,
+          "/media/paev-dashboard-1200.webp"
+        ],
+        [
+          1600,
+          "/media/paev-dashboard-1600.webp"
+        ],
+        [
+          2400,
+          "/media/paev-dashboard-2400.webp"
+        ],
+        [
+          2532,
+          "/media/paev-dashboard-2532.webp"
+        ]
+      ]
+    }
+  },
+  "paev-wordmark": {
+    "width": 1920,
+    "height": 1080,
+    "color": "#080808",
+    "sources": {
+      "avif": [
+        [
+          480,
+          "/media/paev-wordmark-480.avif"
+        ],
+        [
+          800,
+          "/media/paev-wordmark-800.avif"
+        ],
+        [
+          1200,
+          "/media/paev-wordmark-1200.avif"
+        ],
+        [
+          1600,
+          "/media/paev-wordmark-1600.avif"
+        ],
+        [
+          1920,
+          "/media/paev-wordmark-1920.avif"
+        ]
+      ],
+      "webp": [
+        [
+          480,
+          "/media/paev-wordmark-480.webp"
+        ],
+        [
+          800,
+          "/media/paev-wordmark-800.webp"
+        ],
+        [
+          1200,
+          "/media/paev-wordmark-1200.webp"
+        ],
+        [
+          1600,
+          "/media/paev-wordmark-1600.webp"
+        ],
+        [
+          1920,
+          "/media/paev-wordmark-1920.webp"
+        ]
+      ]
+    }
+  },
+  "phasm-airframe": {
+    "width": 2400,
+    "height": 1350,
+    "color": "transparent",
+    "sources": {
+      "avif": [
+        [
+          480,
+          "/media/phasm-airframe-480.avif"
+        ],
+        [
+          800,
+          "/media/phasm-airframe-800.avif"
+        ],
+        [
+          1200,
+          "/media/phasm-airframe-1200.avif"
+        ],
+        [
+          1600,
+          "/media/phasm-airframe-1600.avif"
+        ],
+        [
+          2400,
+          "/media/phasm-airframe-2400.avif"
+        ]
+      ],
+      "webp": [
+        [
+          480,
+          "/media/phasm-airframe-480.webp"
+        ],
+        [
+          800,
+          "/media/phasm-airframe-800.webp"
+        ],
+        [
+          1200,
+          "/media/phasm-airframe-1200.webp"
+        ],
+        [
+          1600,
+          "/media/phasm-airframe-1600.webp"
+        ],
+        [
+          2400,
+          "/media/phasm-airframe-2400.webp"
+        ]
+      ]
+    }
+  },
+  "pid-boat": {
+    "width": 818,
+    "height": 604,
+    "color": "#080808",
+    "sources": {
+      "avif": [
+        [
+          480,
+          "/media/pid-boat-480.avif"
+        ],
+        [
+          800,
+          "/media/pid-boat-800.avif"
+        ],
+        [
+          818,
+          "/media/pid-boat-818.avif"
+        ]
+      ],
+      "webp": [
+        [
+          480,
+          "/media/pid-boat-480.webp"
+        ],
+        [
+          800,
+          "/media/pid-boat-800.webp"
+        ],
+        [
+          818,
+          "/media/pid-boat-818.webp"
+        ]
+      ]
+    }
+  },
+  "synapse-dashboard": {
+    "width": 2522,
+    "height": 1364,
+    "color": "#f8f8e8",
+    "sources": {
+      "avif": [
+        [
+          480,
+          "/media/synapse-dashboard-480.avif"
+        ],
+        [
+          800,
+          "/media/synapse-dashboard-800.avif"
+        ],
+        [
+          1200,
+          "/media/synapse-dashboard-1200.avif"
+        ],
+        [
+          1600,
+          "/media/synapse-dashboard-1600.avif"
+        ],
+        [
+          2400,
+          "/media/synapse-dashboard-2400.avif"
+        ],
+        [
+          2522,
+          "/media/synapse-dashboard-2522.avif"
+        ]
+      ],
+      "webp": [
+        [
+          480,
+          "/media/synapse-dashboard-480.webp"
+        ],
+        [
+          800,
+          "/media/synapse-dashboard-800.webp"
+        ],
+        [
+          1200,
+          "/media/synapse-dashboard-1200.webp"
+        ],
+        [
+          1600,
+          "/media/synapse-dashboard-1600.webp"
+        ],
+        [
+          2400,
+          "/media/synapse-dashboard-2400.webp"
+        ],
+        [
+          2522,
+          "/media/synapse-dashboard-2522.webp"
+        ]
+      ]
+    }
+  }
+}

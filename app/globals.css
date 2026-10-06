@@ -1,209 +1,890 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* ==========================================================================
+   Black ground, one ink, one grey. Three voices: Instrument Serif for names
+   and titles, Geist for reading, Geist Mono in small capitals for labels and
+   numbers. A 12-column grid whose thirds (columns 1, 5 and 9) anchor the
+   navigation and every block of content.
+
+   Motion is slow, short and always about where you're going. The stars drift
+   and carry you forward between pages; one page dissolves as the next rises
+   in; a project's title and image travel from the list onto its page. All of
+   it stops for prefers-reduced-motion.
+   ========================================================================== */
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --bg: #000;
+  --fg: #ececec;
+  --grey: #808080; /* 5.3:1 on black: the lowest contrast used for text */
+  --line: #1c1c1c; /* hairlines */
+  --line-strong: #3a3a3a;
+
+  --m: 16px; /* outer margin */
+  --gap: 16px; /* column gap */
+  --header: 56px;
+
+  /* Reading text: 12.5px on phones, 13px on laptops, 13.5px on large screens. */
+  --fs: clamp(12.5px, 0.1vw + 11.6px, 13.5px);
+  /* Labels: Geist Mono in capitals. */
+  --fs-label: 11px;
+  /* Opening statements. */
+  --fs-lead: clamp(16px, 0.35vw + 12px, 19px);
+  /* Serif: list titles and figures, project titles, the name. */
+  --display: clamp(26px, 1.1vw + 16px, 36px);
+  --title: clamp(36px, 2vw + 18px, 52px);
+  --name: clamp(36px, 1.8vw + 22px, 56px);
+
+  /* Long, soft landings for things arriving; a firm in-out for things moving. */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.76, 0, 0.24, 1);
+
+  color-scheme: dark;
 }
 
-.dark {
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+@media (width >= 64rem) {
+  :root {
+    --m: 20px;
+    --gap: 20px;
+  }
 }
 
 @theme inline {
-  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-*: initial;
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-grey: var(--grey);
+  --color-line: var(--line);
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --font-*: initial;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+}
+
+@theme {
+  /* Spacing utilities are multiples of 8px: p-1 = 8px, mt-6 = 48px. */
+  --spacing: 8px;
+  /* No size utilities: every size is one of the voices above. */
+  --text-*: initial;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  html {
+    background: var(--bg);
+    color: var(--fg);
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--line-strong) transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
+
+  /* No background on body: the starfield sits behind it, on the root. */
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-mono), monospace;
+    min-height: 100svh;
+    font-family: var(--font-sans);
+    font-size: var(--fs);
+    font-weight: 400;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Preflight resets these; they should follow the body. */
+  button,
+  select,
+  kbd {
+    font: inherit;
+    letter-spacing: inherit;
+  }
+
+  ::selection {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--fg);
+    outline-offset: 3px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    cursor: pointer;
   }
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+
+@utility frame {
+  width: 100%;
+  padding-inline: var(--m);
 }
 
-/* Custom scrollbar - Ultra minimal */
-::-webkit-scrollbar {
-  width: 2px;
+/* 4 columns on phones, 12 from 768px. */
+@utility cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--gap);
+
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+/* The three thirds. They stack on phones. */
+@utility t1 {
+  grid-column: 1 / -1;
+
+  @media (width >= 48rem) {
+    grid-column: 1 / span 4;
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 1px;
+@utility t2 {
+  grid-column: 1 / -1;
+
+  @media (width >= 48rem) {
+    grid-column: 5 / span 4;
+  }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+@utility t3 {
+  grid-column: 1 / -1;
+
+  @media (width >= 48rem) {
+    grid-column: 9 / span 4;
+  }
 }
 
-/* Selection */
-::selection {
-  background: var(--foreground);
-  color: var(--background);
+/* Everything right of the first third. */
+@utility t23 {
+  grid-column: 1 / -1;
+
+  @media (width >= 48rem) {
+    grid-column: 5 / -1;
+  }
 }
 
-/* Cursor styles */
-* {
-  cursor: default;
+/* Content clears the fixed header with room to breathe. */
+@utility page-top {
+  padding-top: calc(var(--header) + 80px);
+
+  @media (width >= 48rem) {
+    padding-top: calc(var(--header) + 144px);
+  }
 }
 
-a, button, [role="button"], input, textarea, select {
-  cursor: pointer;
+/* ==========================================================================
+   Type: the voices
+   ========================================================================== */
+
+@utility label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
-input, textarea {
-  cursor: text;
+@utility lead {
+  font-size: var(--fs-lead);
+  line-height: 1.32;
+  letter-spacing: -0.012em;
+  text-wrap: pretty;
 }
 
-/* Smooth transitions for all interactive elements */
-a, button, input, textarea {
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+@utility display {
+  font-family: var(--font-serif);
+  font-size: var(--display);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
 }
 
-/* Focus states - minimal */
-*:focus {
-  outline: none;
+/* A project's own title is set larger than in the list it carries over from. */
+@utility title {
+  font-family: var(--font-serif);
+  font-size: var(--title);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.015em;
 }
 
-*:focus-visible {
-  outline: 1px solid rgba(0, 0, 0, 0.1);
-  outline-offset: 2px;
+@utility name {
+  font-family: var(--font-serif);
+  font-size: var(--name);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.015em;
 }
 
-/* Remove tap highlight on mobile */
-* {
-  -webkit-tap-highlight-color: transparent;
+/* A 44px tap target around a single line of text, without adding height. */
+@utility hit {
+  display: inline-block;
+  padding-block: 14px;
+  margin-block: -14px;
 }
 
-/* Smooth font rendering */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+/* "/ Label": the slash that marks the navigation. */
+@utility slash {
+  &::before {
+    content: "/";
+    content: "/" / "";
+    display: inline-block;
+    margin-right: 0.55em;
+    color: var(--grey);
+  }
 }
 
-@keyframes flowing-marquee {
+/* ==========================================================================
+   Links. Labels roll to a fresh copy of themselves; links inside text draw
+   a line from the left and retract it to the right.
+   ========================================================================== */
+
+@layer components {
+  .nav-link {
+    transition: color 0.3s;
+  }
+
+  /* The section you're in. The name stays ink: it's the way home, not a place. */
+  .nav-link:not(.brand)[aria-current] {
+    color: var(--grey);
+  }
+
+  .roll {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+  }
+
+  .roll > span {
+    display: inline-block;
+    position: relative;
+    transition: translate 0.6s var(--ease-io);
+  }
+
+  .roll > span::after {
+    content: attr(data-text);
+    content: attr(data-text) / "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+
+  .count {
+    margin-left: 0.35em;
+    font-size: 8px;
+    color: var(--grey);
+  }
+
+  .line-link {
+    padding-bottom: 1px;
+    background:
+      linear-gradient(currentColor, currentColor) no-repeat right 100% / 0 1px,
+      linear-gradient(var(--line-strong), var(--line-strong)) no-repeat 0 100% / 100% 1px;
+    transition: background-size 0.6s var(--ease-io);
+  }
+
+  @media (hover: hover) {
+    .nav-link:hover .roll > span {
+      translate: 0 -100%;
+    }
+
+    .line-link:hover {
+      background-position:
+        left 100%,
+        0 100%;
+      background-size:
+        100% 1px,
+        100% 1px;
+    }
+  }
+
+  .skip {
+    position: fixed;
+    z-index: 100;
+    top: 8px;
+    left: var(--m);
+    padding: 12px 16px;
+    background: var(--fg);
+    color: var(--bg);
+    transform: translateY(-200%);
+  }
+
+  .skip:focus {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   The frame: stars behind, header above
+   ========================================================================== */
+
+@layer components {
+  .starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100lvh;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2.4s var(--ease);
+  }
+
+  .starfield[data-ready] {
+    opacity: 1;
+  }
+
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 20;
+    /* Holds still while the page beneath it changes. */
+    view-transition-name: site-header;
+    transition: translate 0.7s var(--ease);
+  }
+
+  /* A soft fall-off behind the header once there's content to scroll under it. */
+  .site-header::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 -40px;
+    z-index: -1;
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.92), rgb(0 0 0 / 0.65) 50%, transparent);
+    opacity: 0;
+    transition: opacity 0.5s var(--ease);
+    pointer-events: none;
+  }
+
+  .site-header[data-scrolled]::before {
+    opacity: 1;
+  }
+
+  .site-header[data-hidden]:not(:focus-within) {
+    translate: 0 calc(-100% - 48px);
+  }
+
+  /* The home page is a single screen. */
+  body:has(.home) .site-footer {
+    display: none;
+  }
+
+  .site-footer {
+    margin-top: 128px;
+  }
+
+  @media (width >= 48rem) {
+    .site-footer {
+      margin-top: 192px;
+    }
+  }
+}
+
+/* ==========================================================================
+   Entrances. .reveal for what's on screen when a page arrives, .in-view
+   for what scrolls up into it later, letters for the name.
+
+   Every animation on the site moves only opacity and transforms, which the
+   GPU composites on its own: no blur, no clip-path, nothing that makes the
+   browser repaint or re-layout mid-flight.
+   ========================================================================== */
+
+@keyframes rise {
   from {
-    transform: translateX(0%);
-  }
-  to {
-    transform: translateX(-50%);
+    opacity: 0;
+    translate: 0 14px;
   }
 }
 
-@layer utilities {
-  .animate-flowing-marquee {
-    animation: flowing-marquee 15s linear infinite;
+@keyframes letter-in {
+  from {
+    opacity: 0;
+    translate: 0 0.22em;
+  }
+}
+
+@keyframes settle {
+  from {
+    scale: 1.06;
+  }
+}
+
+@layer components {
+  .reveal {
+    animation: rise 1.1s var(--ease) both;
+    animation-delay: calc(140ms + var(--i, 0) * 70ms);
+  }
+
+  .reveal-media {
+    animation: rise 1.2s var(--ease) both;
+    animation-delay: calc(140ms + var(--i, 0) * 70ms);
+  }
+
+  .reveal-media picture {
+    display: block;
+    animation: settle 1.8s var(--ease) both;
+    animation-delay: calc(140ms + var(--i, 0) * 70ms);
+  }
+
+  .in-view {
+    transition:
+      opacity 1.1s var(--ease),
+      translate 1.3s var(--ease);
+  }
+
+  @media (scripting: enabled) {
+    .in-view:not([data-shown]) {
+      opacity: 0;
+      translate: 0 24px;
+    }
+  }
+
+  .letter {
+    display: inline-block;
+    animation: letter-in 1.5s var(--ease) both;
+    animation-delay: calc(220ms + var(--d) * 60ms);
+    transition: transform 0.9s var(--ease);
+  }
+
+  @media (hover: hover) {
+    .letter:hover {
+      transform: translateY(-0.1em);
+      transition-duration: 0.35s;
+    }
+  }
+}
+
+/* Images drift a little slower than the page, inside their frames. */
+@supports (animation-timeline: view()) {
+  @keyframes drift {
+    from {
+      translate: 0 -2.4%;
+    }
+    to {
+      translate: 0 2.4%;
+    }
+  }
+
+  .drift {
+    scale: 1.05;
+    animation: drift linear both;
+    animation-timeline: view();
+    animation-range: cover;
+  }
+}
+
+/* ==========================================================================
+   Blocks
+   ========================================================================== */
+
+@layer components {
+  /* A Swiss row: hairline, label on the first third, content beside it. */
+  .row {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .row:first-child {
+    margin-top: 0;
+  }
+
+  @media (width >= 48rem) {
+    .row {
+      margin-top: 80px;
+      padding-top: 20px;
+    }
+  }
+
+  .hero,
+  .frame-img {
+    overflow: hidden;
+  }
+
+  .next-link .display {
+    display: inline-block;
+  }
+
+  .next-arrow {
+    display: inline-block;
+    margin-left: 0.3em;
+    opacity: 0;
+    translate: -0.5em 0;
+    transition:
+      opacity 0.5s var(--ease),
+      translate 0.8s var(--ease);
+  }
+
+  @media (hover: hover) {
+    .next-link:hover .next-arrow {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  .copy {
+    transition: color 0.3s;
+  }
+
+  @media (hover: hover) {
+    .copy:hover {
+      color: var(--grey);
+    }
+  }
+
+  /* Two lines in one slot: the second rolls up over the first. */
+  .swap {
+    display: inline-grid;
+    overflow: hidden;
+    vertical-align: top;
+  }
+
+  .swap > * {
+    grid-area: 1 / 1;
+    transition:
+      translate 0.6s var(--ease-io),
+      opacity 0.6s var(--ease-io);
+  }
+
+  .swap > :last-child,
+  .swap[data-on] > :first-child {
+    translate: 0 100%;
+    opacity: 0;
+  }
+
+  .swap[data-on] > :first-child {
+    translate: 0 -100%;
+  }
+
+  .swap[data-on] > :last-child {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Work: the index. Rows on the first two thirds, the preview on the last.
+   ========================================================================== */
+
+@keyframes frame-in {
+  from {
+    translate: 0 var(--in);
+  }
+}
+
+@keyframes image-in {
+  from {
+    translate: 0 calc(var(--in) * -1);
+  }
+}
+
+@layer components {
+  .work-list,
+  .work-row,
+  .work-link {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+  }
+
+  .work-list {
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (width >= 48rem) {
+    .work-list {
+      grid-column: 1 / span 8;
+    }
+  }
+
+  .work-row {
+    position: relative;
+    border-top: 1px solid var(--line);
+    transition:
+      opacity 0.5s var(--ease),
+      translate 0.6s var(--ease);
+  }
+
+  /* The rule that draws across a chosen row. */
+  .work-row::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 1px;
+    background: var(--fg);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s var(--ease-io);
+  }
+
+  .work-link {
+    align-items: baseline;
+    row-gap: 6px;
+    padding-block: 16px 18px;
+  }
+
+  .work-index {
+    grid-column: 1;
+    color: var(--grey);
+    transition: color 0.4s;
+  }
+
+  .work-title-wrap {
+    grid-column: 2 / -1;
+  }
+
+  .work-title {
+    display: inline-block;
+    transition: translate 0.8s var(--ease);
+  }
+
+  .work-meta {
+    grid-column: 2 / span 2;
+    color: var(--grey);
+  }
+
+  .work-year {
+    grid-column: 4;
+    color: var(--grey);
+    text-align: right;
+  }
+
+  @media (width >= 48rem) {
+    .work-link {
+      padding-block: 18px 20px;
+    }
+
+    .work-title-wrap {
+      grid-column: 2 / span 4;
+    }
+
+    .work-meta {
+      grid-column: 6 / span 2;
+    }
+
+    .work-year {
+      grid-column: 8;
+    }
+  }
+
+  .work-row[data-active] .work-index {
+    color: var(--fg);
+  }
+
+  @media (hover: hover) {
+    .work-row[data-active] .work-title {
+      translate: 12px 0;
+    }
+
+    .work-list:has([data-active]) .work-row:not([data-active]) {
+      opacity: 0.32;
+    }
+  }
+
+  /* Choosing: the rule draws, and the rest of the list parts around the chosen
+     row (rows above drift up, rows below drift down) as it fades. */
+  .work[data-choosing] {
+    pointer-events: none;
+  }
+
+  .work-row[data-chosen]::after {
+    transform: scaleX(1);
+  }
+
+  .work[data-choosing] .work-row:not([data-chosen]) {
+    opacity: 0;
+    translate: 0 calc(var(--side, 0) * 12px);
+    transition-duration: 0.4s;
+    transition-delay: calc(var(--d) * 30ms);
+  }
+
+  .work-preview {
+    display: none;
+  }
+
+  @media (width >= 48rem) {
+    .work-preview {
+      position: sticky;
+      top: calc(var(--header) + 32px);
+      display: block;
+      grid-column: 9 / -1;
+      align-self: start;
+    }
+  }
+
+  /* Each image waits outside its window. Moving down the list wipes the next
+     one up from below and sends the last one out at the top, and the reverse.
+     The wipe is two opposite translations, the frame one way and the image
+     the other, so the picture holds still while its window moves: transforms
+     only, nothing to repaint. */
+  .work-preview {
+    --in: 100%;
+  }
+
+  .work-preview[data-from="above"] {
+    --in: -100%;
+  }
+
+  /* Each image remembers which way it left, so a change of direction never
+     moves the ones already out of sight. */
+  .work-shot {
+    --out: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .work-shot[data-exit="up"] {
+    --out: -100%;
+  }
+
+  .work-shot-frame {
+    height: 100%;
+    overflow: hidden;
+    translate: 0 var(--out);
+    transition: translate 0.75s var(--ease-io);
+  }
+
+  .work-shot-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    translate: 0 calc(var(--out) * -1);
+    scale: 1.12;
+    transition:
+      translate 0.75s var(--ease-io),
+      scale 1.2s var(--ease);
+  }
+
+  /* Arriving is an animation from the side the pointer came from. No
+     translate transition here: a running transition would outrank it. */
+  .work-shot[data-on] .work-shot-frame {
+    translate: 0 0;
+    transition: none;
+    animation: frame-in 0.75s var(--ease-io) both;
+  }
+
+  .work-shot[data-on] .work-shot-img {
+    translate: 0 0;
+    scale: 1;
+    transition: scale 1.2s var(--ease);
+    animation: image-in 0.75s var(--ease-io) both;
+  }
+}
+
+/* ==========================================================================
+   Page transitions (components/transitions.tsx)
+
+   The old page is a still image on top: it fades forward, growing a touch as
+   if you were moving through it, uncovering the live new page whose blocks
+   rise in underneath. Carried titles and images travel between their two
+   places. The header holds still throughout. Opacity and transforms only, so
+   the whole sequence runs on the GPU.
+   ========================================================================== */
+
+::view-transition-group(*) {
+  animation-duration: 0.9s;
+  animation-timing-function: var(--ease-io);
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+  mix-blend-mode: normal;
+  animation: page-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: scale(1.025);
+  }
+}
+
+::view-transition-group(site-header) {
+  animation-duration: 0.6s;
+}
+
+::view-transition-group(morph-title),
+::view-transition-group(morph-hero) {
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.7, 0, 0.18, 1);
+}
+
+::view-transition-old(morph-hero),
+::view-transition-new(morph-hero) {
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Carried from a page that has no place for it on the next: leave with the page. */
+::view-transition-old(*):only-child {
+  animation-duration: 0.45s;
+}
+
+/* ==========================================================================
+   Reduced motion: everything arrives in place.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  .reveal,
+  .reveal-media,
+  .reveal-media picture,
+  .letter,
+  .drift,
+  .work-shot-frame,
+  .work-shot-img {
+    animation: none !important;
+  }
+
+  .drift {
+    scale: none;
+  }
+
+  .in-view,
+  .in-view:not([data-shown]) {
+    opacity: 1 !important;
+    translate: none !important;
+    transition: none !important;
+  }
+
+  .site-header,
+  .work-row,
+  .work-title,
+  .work-shot-frame,
+  .work-shot-img,
+  .roll > span {
+    transition: none !important;
   }
 }
