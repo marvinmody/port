@@ -17,7 +17,6 @@ export function BackToTop() {
       <span className="roll">
         <span data-text="Back to top">Back to top</span>
       </span>
-      <span aria-hidden="true">&nbsp;↑</span>
     </a>
   )
 }

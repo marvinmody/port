@@ -49,7 +49,8 @@ export function resolve(image: Image): Resolved | undefined {
   }
 }
 
-/** The project hero's rendered width. The Work page's hover previews use the
- *  same value, so the browser picks the same file and the image is already
- *  cached when it carries over to the project page. */
-export const HERO_SIZES = "(min-width: 64rem) calc(100vw - 40px), calc(100vw - 32px)"
+/** A project image's rendered width: at most two thirds of the screen beside
+ *  its text, the full width on phones. The Work page's cards use the same
+ *  value, so the browser picks the same file and the image is already cached
+ *  when it carries over to the project page. */
+export const HERO_SIZES = "(min-width: 48rem) 66vw, 100vw"

@@ -3,12 +3,16 @@
 import { usePathname } from "next/navigation"
 import { useEffect, useRef } from "react"
 import { bus, NAVIGATE } from "@/lib/bus"
+import { takeDrift } from "@/lib/drift"
 import { onTick, whenIdle } from "@/lib/ticker"
 
 // The stars behind every page: one WebGL point cloud seen in perspective.
 // Each star drifts on its own; scrolling moves the camera (near stars pass
-// faster than far ones); the pointer leans it a little; and every page change
-// carries you a short way forward through the field.
+// faster than far ones), downwards or, on a page that moves sideways,
+// sideways, and so does the Work row as it slides; the pointer leans it a
+// little; and every page change carries you a short way forward through the
+// field. On the home page the pointer also
+// bends the light around it, like a small mass in front of the sky.
 
 const VERTEX = /* glsl */ `
 attribute vec4 a_seed; // xy: place on the far plane (-1..1); z: depth phase (0..1); w: random
@@ -21,6 +25,7 @@ uniform float u_travel;
 uniform vec2 u_offset;
 uniform float u_streak;
 uniform float u_bright;
+uniform vec3 u_lens; // xy: the pointer in clip space; z: strength, 0..1
 
 varying float v_alpha;
 varying float v_size;
@@ -57,6 +62,16 @@ void main() {
 
   vec2 ndc = w / depth;
   ndc.x /= aspect;
+
+  // Gravitational lensing, loosely: light from stars behind the pointer is
+  // pushed outward, hardest inside a small ring, fading to nothing a short way
+  // off. Measured in screen units so the ring stays round.
+  vec2 off = (ndc - u_lens.xy) * vec2(aspect, 1.0);
+  float r = max(length(off), 0.0001);
+  float ring = 0.065;
+  float bend = u_lens.z * ring * ring / max(r, ring) * (1.0 - smoothstep(0.24, 0.5, r));
+  ndc += off / r * bend / vec2(aspect, 1.0);
+
   gl_Position = vec4(ndc, 0.0, 1.0);
 
   float size = min(mix(1.0, 2.1, a_rand.x) / pow(depth, 0.9), 7.0);
@@ -84,6 +99,8 @@ void main() {
 const FRAGMENT = /* glsl */ `
 precision mediump float;
 
+uniform float u_axis; // 0: streak along y (scrolling down); 1: along x (sideways)
+
 varying float v_alpha;
 varying float v_size;
 varying float v_stretch;
@@ -91,7 +108,9 @@ varying vec3 v_tint;
 
 void main() {
   vec2 q = (gl_PointCoord - 0.5) * 2.0;
-  q.x *= v_stretch;
+  // The sprite is stretch times the dot; squeeze the other axis back.
+  if (u_axis > 0.5) q.y *= v_stretch;
+  else q.x *= v_stretch;
   float r = length(q);
   // About a pixel of soft edge: small stars stay solid, large ones stay crisp.
   float edge = clamp(1.6 / v_size, 0.18, 0.6);
@@ -115,8 +134,10 @@ const MAX_DPR = 1.5
 
 // Full on the home page, quieter behind reading.
 const brightnessFor = (path: string) => (path === "/" ? 1 : 0.6)
+// The lens belongs to the home page, where the stars are the whole picture.
+const lensFor = (path: string) => (path === "/" ? 1 : 0)
 
-type Field = { warp(): void; brighten(level: number): void }
+type Field = { warp(): void; page(path: string): void }
 
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
   const shader = gl.createShader(type)
@@ -181,6 +202,8 @@ function createField(canvas: HTMLCanvasElement, still: boolean): (Field & { dest
   const uOffset = u("u_offset")
   const uStreak = u("u_streak")
   const uBright = u("u_bright")
+  const uLens = u("u_lens")
+  const uAxis = u("u_axis")
 
   gl.clearColor(0, 0, 0, 1)
   gl.enable(gl.BLEND)
@@ -200,7 +223,14 @@ function createField(canvas: HTMLCanvasElement, still: boolean): (Field & { dest
   let leanY = 0
   let leanToX = 0
   let leanToY = 0
-  let shift = 0
+  let pointerIn = false
+  let lensX = 0
+  let lensY = 0
+  let lens = 0
+  let lensTo = lensFor(window.location.pathname)
+  let shiftX = 0
+  let shiftY = 0
+  let axis = 0
   let lastScroll = window.scrollY
   let streak = 0
   let stopTick: (() => void) | null = null
@@ -208,9 +238,11 @@ function createField(canvas: HTMLCanvasElement, still: boolean): (Field & { dest
   const draw = () => {
     gl.uniform1f(uTime, time)
     gl.uniform1f(uTravel, travel)
-    gl.uniform2f(uOffset, leanX * LEAN, leanY * LEAN - shift)
+    gl.uniform2f(uOffset, leanX * LEAN + shiftX, leanY * LEAN - shiftY)
     gl.uniform1f(uStreak, streak)
     gl.uniform1f(uBright, bright)
+    gl.uniform3f(uLens, lensX, lensY, lens)
+    gl.uniform1f(uAxis, axis)
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.drawArrays(gl.POINTS, 0, count)
   }
@@ -249,15 +281,32 @@ function createField(canvas: HTMLCanvasElement, still: boolean): (Field & { dest
     leanX += (leanToX - leanX) * ease(2.2)
     leanY += (leanToY - leanY) * ease(2.2)
     bright += (brightTo - bright) * ease(1.4)
+    // The lens follows the pointer closely and fades in and out gently.
+    const lensWas = lens + lensX + lensY
+    lensX += (leanToX - lensX) * ease(9)
+    lensY += (leanToY - lensY) * ease(9)
+    lens += ((pointerIn ? lensTo : 0) - lens) * ease(3)
 
-    // Scroll moves the camera. A jump of more than a quarter screen in one
-    // frame is a teleport (arriving on a new page), not motion.
+    // Scroll moves the camera: down a page that reads downwards, sideways on
+    // a rail, so the stars travel with the content. A jump of more than a
+    // quarter screen in one frame is a teleport (a new page), not motion.
+    const sideways = document.documentElement.dataset.flow === "horizontal"
+    axis = sideways ? 1 : 0
     const y = window.scrollY
     let dy = y - lastScroll
     lastScroll = y
     if (Math.abs(dy) > window.innerHeight * 0.25) dy = 0
-    shift += (dy / window.innerHeight) * PARALLAX
-    const speed = Math.abs(dy) / dt / window.innerHeight
+    if (sideways) shiftX += (dy / window.innerHeight) * PARALLAX
+    else shiftY += (dy / window.innerHeight) * PARALLAX
+    // Content that moves sideways without scrolling (the Work row) carries
+    // the camera the same way, at the same rate.
+    let dx = takeDrift()
+    if (Math.abs(dx) > window.innerWidth * 0.5) dx = 0
+    if (dx) {
+      shiftX += (dx / window.innerHeight) * PARALLAX
+      axis = 1
+    }
+    const speed = (Math.abs(dy) + Math.abs(dx)) / dt / window.innerHeight
     streak += (Math.min(speed / 3, 1) - streak) * ease(8)
 
     // With only the slow drift moving, every other frame is plenty: half the
@@ -265,9 +314,11 @@ function createField(canvas: HTMLCanvasElement, still: boolean): (Field & { dest
     // brightness changes always get every frame.
     const busy =
       dy !== 0 ||
+      dx !== 0 ||
       streak > 0.01 ||
       Math.abs(travelSpeed - DRIFT) > 0.002 ||
       Math.abs(leanToX - leanX) + Math.abs(leanToY - leanY) > 0.002 ||
+      Math.abs(lens + lensX + lensY - lensWas) > 0.0005 ||
       Math.abs(brightTo - bright) > 0.004
     if (!busy && now - lastDraw < 30) return
     lastDraw = now
@@ -277,10 +328,12 @@ function createField(canvas: HTMLCanvasElement, still: boolean): (Field & { dest
 
   const onPointer = (event: PointerEvent) => {
     if (event.pointerType !== "mouse") return
+    pointerIn = true
     leanToX = (event.clientX / window.innerWidth) * 2 - 1
     leanToY = -((event.clientY / window.innerHeight) * 2 - 1)
   }
   const onLeave = () => {
+    pointerIn = false
     leanToX = 0
     leanToY = 0
   }
@@ -302,10 +355,11 @@ function createField(canvas: HTMLCanvasElement, still: boolean): (Field & { dest
       lastWarp = now
       travelTo += WARP
     },
-    brighten(level) {
-      brightTo = level
+    page(path) {
+      brightTo = brightnessFor(path)
+      lensTo = lensFor(path)
       if (still) {
-        bright = level
+        bright = brightTo
         draw()
       }
     },
@@ -367,9 +421,9 @@ export function Starfield() {
     }
   }, [])
 
-  // Every page change: travel forward, and settle at that page's brightness.
+  // Every page change: travel forward, and settle into that page's sky.
   useEffect(() => {
-    field.current?.brighten(brightnessFor(pathname.replace(/(.)\/$/, "$1")))
+    field.current?.page(pathname.replace(/(.)\/$/, "$1"))
     field.current?.warp()
   }, [pathname])
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
-import type { CSSProperties } from "react"
-import { Row } from "@/components/row"
+import { LOGOS, Logo } from "@/components/logo"
+import { Panel } from "@/components/panel"
+import { Rail } from "@/components/rail"
+import { Link } from "@/components/transitions"
 import { about, type Entry } from "@/content/about"
 import { site } from "@/content/site"
 
@@ -11,17 +13,33 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about/" },
 }
 
-const order = (i: number) => ({ "--i": i }) as CSSProperties
-const external = { target: "_blank", rel: "noopener noreferrer" } as const
+// The name (with its logo, if it has one) and period on one line, a quiet
+// line of role and place, then the detail. A logo that spells the name stands
+// in for it on screen; screen readers still hear the name.
+function Name({ entry }: { entry: Entry }) {
+  const name = entry.href ? (
+    <Link href={entry.href} className="line-link">
+      {entry.title}
+    </Link>
+  ) : (
+    <span>{entry.title}</span>
+  )
+  if (!entry.logo) return name
+  return (
+    <span className="entry-name">
+      <Logo name={entry.logo} className="entry-logo" />
+      {LOGOS[entry.logo].wordmark ? <span className="sr-only">{entry.title}</span> : name}
+    </span>
+  )
+}
 
-// Title and period on one line, a grey meta line, then the detail.
 function Entries({ entries }: { entries: Entry[] }) {
   return (
     <ul className="space-y-5">
       {entries.map((entry) => (
-        <li key={entry.title} className="max-w-[60ch]">
+        <li key={entry.title}>
           <h3 className="flex items-baseline justify-between gap-3">
-            <span>{entry.title}</span>
+            <Name entry={entry} />
             {entry.period && <span className="label shrink-0 text-grey">{entry.period}</span>}
           </h3>
           {entry.meta && <p className="text-grey">{entry.meta}</p>}
@@ -34,88 +52,41 @@ function Entries({ entries }: { entries: Entry[] }) {
 
 export default function About() {
   return (
-    <div className="frame page-top">
-      <h1 className="sr-only">About {site.name}</h1>
-
-      <div className="cols">
-        <p className="reveal label t1 text-grey">About</p>
-        <p className="reveal lead t23 mt-2 max-w-[38ch] md:mt-0" style={order(1)}>
-          {about.intro}
-        </p>
-      </div>
-
-      {/* Four numbers that say the most in the least space. */}
-      <dl className="reveal cols mt-12 gap-y-6 md:mt-20" style={order(2)}>
-        {about.figures.map((figure) => (
-          <div key={figure.label} className="col-span-2 flex flex-col-reverse justify-end md:col-span-3">
-            <dt className="label mt-1 max-w-[22ch] text-grey">{figure.label}</dt>
-            <dd className="display">{figure.value}</dd>
-          </div>
-        ))}
-      </dl>
-
-      <div className="mt-12 md:mt-20">
-        <Row id="experience" label="Experience" index="01">
-          <Entries entries={about.experience} />
-        </Row>
-        <Row id="leadership" label="Leadership" index="02">
-          <Entries entries={about.leadership} />
-        </Row>
-        <Row id="education" label="Education" index="03">
-          <Entries entries={about.education} />
-          <p className="mt-5 max-w-[60ch] text-grey">
-            <span className="label">Coursework&emsp;</span>
-            {about.coursework.join(", ")}.
-          </p>
-        </Row>
-        <Row id="recognition" label="Recognition" index="04">
-          <ul className="grid gap-x-[var(--gap)] gap-y-3 md:grid-cols-2">
-            {about.recognition.map((entry) => (
-              <li key={entry.title}>
-                {entry.title}
-                {entry.meta && <span className="block text-grey">{entry.meta}</span>}
-              </li>
-            ))}
-          </ul>
-        </Row>
-        <Row id="capabilities" label="Capabilities" index="05">
-          <dl className="grid gap-x-[var(--gap)] gap-y-3 md:grid-cols-2">
-            {about.capabilities.map((group) => (
-              <div key={group.title}>
-                <dt>{group.title}</dt>
-                <dd className="text-grey">{group.items.join(", ")}</dd>
-              </div>
-            ))}
-          </dl>
-        </Row>
-        <Row id="elsewhere" label="Elsewhere" index="06">
-          <ul className="flex flex-wrap gap-x-5 gap-y-1">
-            <li>
-              <a href={`mailto:${site.email}`} className="line-link">
-                {site.email}
-              </a>
+    <Rail>
+      <section className="panel panel-text" data-panel="intro">
+        <h1 className="sr-only">About {site.name}</h1>
+        <p className="reveal lead max-w-[30ch]">{about.intro}</p>
+      </section>
+      <Panel id="experience" label="Experience" first order={1}>
+        <Entries entries={about.experience} />
+      </Panel>
+      <Panel id="leadership" label="Leadership" order={2}>
+        <Entries entries={about.leadership} />
+      </Panel>
+      <Panel id="education" label="Education">
+        <Entries entries={about.education} />
+        <p className="mt-4 text-grey">Coursework: {about.coursework.join(", ")}.</p>
+      </Panel>
+      <Panel id="recognition" label="Recognition">
+        <ul className="space-y-3">
+          {about.recognition.map((entry) => (
+            <li key={entry.title}>
+              {entry.title}
+              {entry.meta && <span className="block text-grey">{entry.meta}</span>}
             </li>
-            {site.socials.map((social) => (
-              <li key={social.href}>
-                <a href={social.href} {...external} className="line-link">
-                  {social.label}
-                </a>
-                <span aria-hidden="true">&nbsp;↗</span>
-                <span className="sr-only"> (opens in a new tab)</span>
-              </li>
-            ))}
-            {site.resume && (
-              <li>
-                <a href={site.resume} {...external} className="line-link">
-                  Résumé
-                </a>
-                <span aria-hidden="true">&nbsp;↗</span>
-                <span className="sr-only"> (PDF, opens in a new tab)</span>
-              </li>
-            )}
-          </ul>
-        </Row>
-      </div>
-    </div>
+          ))}
+        </ul>
+      </Panel>
+      <Panel id="capabilities" label="Capabilities">
+        <dl className="space-y-3">
+          {about.capabilities.map((group) => (
+            <div key={group.title}>
+              <dt className="text-grey">{group.title}</dt>
+              <dd>{group.items.join(", ")}</dd>
+            </div>
+          ))}
+        </dl>
+      </Panel>
+    </Rail>
   )
 }

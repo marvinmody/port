@@ -6,6 +6,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   type ComponentProps,
@@ -13,7 +14,7 @@ import {
   type ReactNode,
 } from "react"
 import { bus, NAVIGATE } from "@/lib/bus"
-import { prefersReducedMotion, scrollToTop } from "@/lib/scroll"
+import { prefersReducedMotion, scrollToTop, scrollToY } from "@/lib/scroll"
 
 // Page changes run through the View Transitions API. The old page is
 // captured and dissolves forward (see globals.css) while the new one rises in
@@ -24,7 +25,20 @@ import { prefersReducedMotion, scrollToTop } from "@/lib/scroll"
 // data-slug="<project>". Only the pair for the project in play is named, just
 // before the old page is captured and just after the new one commits.
 
-type Navigate = (href: string) => void
+// The page transition in flight, if any. A carried element on the new page
+// can wait for it to land before handing over to what it stands in for
+// (components/work-carousel.tsx).
+let landing: Promise<void> = Promise.resolve()
+
+/** Resolves once the page transition in flight has finished; at once if there's none. */
+export const landed = () => landing
+
+type Options = {
+  /** Go back in history instead, if that's where `href` is: no new entry. */
+  back?: boolean
+}
+
+type Navigate = (href: string, options?: Options) => void
 
 const NavigateContext = createContext<Navigate | null>(null)
 
@@ -43,9 +57,19 @@ function carriedSlug(from: string, to: string) {
   return projectSlug(to) ?? (trim(to) === "/work" ? projectSlug(from) : undefined)
 }
 
+// Both ways: on a rail, a section can be off to the side.
 function onScreen(el: HTMLElement) {
   const box = el.getBoundingClientRect()
-  return box.width > 0 && box.bottom > 0 && box.top < window.innerHeight
+  return (
+    box.width > 0 && box.bottom > 0 && box.top < window.innerHeight && box.right > 0 && box.left < window.innerWidth
+  )
+}
+
+// Arriving: at the top of the new page, with focus at its start. (Back on the
+// Work page, the row opens on the project you left by itself: lib/recent.ts.)
+function arriveAt() {
+  scrollToTop(true)
+  focusMain()
 }
 
 // Names the carried elements for `slug`, at most one of each kind, and only
@@ -65,15 +89,20 @@ function nameCarried(slug: string, onScreenOnly: boolean, only?: Set<string>) {
   return named
 }
 
-// The move is a carried element's entrance: skip its own reveal animations.
+// The move is a carried element's entrance: skip its own reveal animations,
+// and any an ancestor is running, which would dim it the moment it lands.
 function settleEntrance(el: HTMLElement) {
-  for (const animation of el.getAnimations({ subtree: true })) {
-    try {
-      if (animation.timeline === document.timeline) animation.finish()
-    } catch {
-      // An endless animation can't be finished; leave it running.
+  const finish = (animations: Animation[]) => {
+    for (const animation of animations) {
+      try {
+        if (animation.timeline === document.timeline) animation.finish()
+      } catch {
+        // An endless animation can't be finished; leave it running.
+      }
     }
   }
+  finish(el.getAnimations({ subtree: true }))
+  for (let node = el.parentElement; node && node.id !== "main"; node = node.parentElement) finish(node.getAnimations())
 }
 
 function focusMain() {
@@ -86,15 +115,37 @@ export function Transitions({ children }: { children: ReactNode }) {
   // Runs once the next route has committed to the DOM.
   const arrive = useRef<(() => void) | null>(null)
   const running = useRef(false)
+  // The page before this one, to step back to it rather than forward.
+  const here = useRef(pathname)
+  const previous = useRef<string | null>(null)
+  // Where each page was scrolled to, for the browser's back and forward.
+  const scrolled = useRef(new Map<string, number>())
+
+  // The site restores scroll itself. Left to the browser, it puts the old
+  // position back after a history step, which would undo a rail opening on
+  // the project you came from.
+  useEffect(() => {
+    window.history.scrollRestoration = "manual"
+    const remember = () => scrolled.current.set(trim(here.current), window.scrollY)
+    window.addEventListener("scroll", remember, { passive: true })
+    return () => window.removeEventListener("scroll", remember)
+  }, [])
 
   useLayoutEffect(() => {
+    const changed = here.current !== pathname
+    if (changed) {
+      previous.current = here.current
+      here.current = pathname
+    }
     const done = arrive.current
     arrive.current = null
-    done?.()
+    if (done) done()
+    // Back or forward from the browser: return to where this page was.
+    else if (changed) scrollToY(scrolled.current.get(trim(pathname)) ?? 0, true)
   }, [pathname])
 
   const navigate = useCallback<Navigate>(
-    (href) => {
+    (href, options) => {
       const url = new URL(href, window.location.href)
       const from = window.location.pathname
       if (url.origin !== window.location.origin) {
@@ -107,18 +158,18 @@ export function Transitions({ children }: { children: ReactNode }) {
       }
 
       bus?.dispatchEvent(new Event(NAVIGATE))
+      const to = url.pathname
+      const slug = carriedSlug(from, to)
+      const back = options?.back && previous.current !== null && trim(previous.current) === trim(to)
+      const go = () => (back ? router.back() : router.push(href, { scroll: false }))
 
       if (!document.startViewTransition || prefersReducedMotion() || running.current) {
-        arrive.current = () => {
-          scrollToTop(true)
-          focusMain()
-        }
-        router.push(href, { scroll: false })
+        arrive.current = arriveAt
+        go()
         return
       }
 
       running.current = true
-      const slug = carriedSlug(from, url.pathname)
       const named = slug ? nameCarried(slug, true) : []
       // Only what leaves the old page can arrive on the new one; the rest of
       // the new page makes its usual entrance.
@@ -147,17 +198,16 @@ export function Transitions({ children }: { children: ReactNode }) {
             // page lets go and the new one simply appears when it's ready.
             const timeout = window.setTimeout(settle, 1500)
             arrive.current = () => {
-              scrollToTop(true)
-              focusMain()
+              arriveAt()
               if (slug && carried.size > 0 && !settled) {
-                for (const el of nameCarried(slug, false, carried)) {
+                for (const el of nameCarried(slug, true, carried)) {
                   settleEntrance(el)
                   named.push(el)
                 }
               }
               settle()
             }
-            router.push(href, { scroll: false })
+            go()
           }),
       )
       stalled = window.setTimeout(() => {
@@ -166,14 +216,15 @@ export function Transitions({ children }: { children: ReactNode }) {
         running.current = false
         transition.skipTransition()
         for (const el of named) el.style.viewTransitionName = ""
-        arrive.current = () => {
-          scrollToTop(true)
-          focusMain()
-        }
-        router.push(href, { scroll: false })
+        arrive.current = arriveAt
+        go()
       }, 1200)
       // A skipped transition still swaps the page; it just doesn't animate.
       transition.ready.catch(() => {})
+      landing = transition.finished.then(
+        () => {},
+        () => {},
+      )
       transition.finished.finally(() => {
         for (const el of named) el.style.viewTransitionName = ""
         running.current = false

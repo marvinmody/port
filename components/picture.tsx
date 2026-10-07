@@ -4,8 +4,9 @@ type Props = {
   image: Resolved
   /** Rendered width, as an <img sizes> value. */
   sizes: string
-  /** Above the fold: load eagerly with high priority. */
-  priority?: boolean
+  /** Above the fold: load eagerly with high priority. "low": eagerly, but
+   *  after everything the page needs (fetching ahead for another page). */
+  priority?: boolean | "low"
   /** Purely atmospheric: hidden from screen readers. */
   decorative?: boolean
   className?: string
@@ -24,7 +25,7 @@ export function Picture({ image, sizes, priority, decorative, className }: Props
         height={image.height}
         alt={decorative ? "" : image.alt}
         loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : undefined}
+        fetchPriority={priority === "low" ? "low" : priority ? "high" : undefined}
         decoding="async"
         className={className}
         style={image.position ? { objectPosition: image.position } : undefined}

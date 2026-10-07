@@ -11,7 +11,8 @@ let raf = 0
 
 function loop(time: number) {
   raf = requestAnimationFrame(loop)
-  for (const { tick } of ticks) tick(time)
+  // A copy: a tick may unsubscribe itself (or another) mid-frame.
+  for (const { tick } of ticks.slice()) tick(time)
 }
 
 /** Runs `tick` every frame, lower `order` first. Returns an unsubscribe. */

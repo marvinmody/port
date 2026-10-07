@@ -214,53 +214,61 @@
       ]
     }
   },
-  "phasm-airframe": {
-    "width": 2400,
-    "height": 1350,
-    "color": "transparent",
+  "phasm-site": {
+    "width": 2509,
+    "height": 1339,
+    "color": "#8898a8",
     "sources": {
       "avif": [
         [
           480,
-          "/media/phasm-airframe-480.avif"
+          "/media/phasm-site-480.avif"
         ],
         [
           800,
-          "/media/phasm-airframe-800.avif"
+          "/media/phasm-site-800.avif"
         ],
         [
           1200,
-          "/media/phasm-airframe-1200.avif"
+          "/media/phasm-site-1200.avif"
         ],
         [
           1600,
-          "/media/phasm-airframe-1600.avif"
+          "/media/phasm-site-1600.avif"
         ],
         [
           2400,
-          "/media/phasm-airframe-2400.avif"
+          "/media/phasm-site-2400.avif"
+        ],
+        [
+          2509,
+          "/media/phasm-site-2509.avif"
         ]
       ],
       "webp": [
         [
           480,
-          "/media/phasm-airframe-480.webp"
+          "/media/phasm-site-480.webp"
         ],
         [
           800,
-          "/media/phasm-airframe-800.webp"
+          "/media/phasm-site-800.webp"
         ],
         [
           1200,
-          "/media/phasm-airframe-1200.webp"
+          "/media/phasm-site-1200.webp"
         ],
         [
           1600,
-          "/media/phasm-airframe-1600.webp"
+          "/media/phasm-site-1600.webp"
         ],
         [
           2400,
-          "/media/phasm-airframe-2400.webp"
+          "/media/phasm-site-2400.webp"
+        ],
+        [
+          2509,
+          "/media/phasm-site-2509.webp"
         ]
       ]
     }

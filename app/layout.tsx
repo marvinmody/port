@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google"
+import { Fragment_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google"
 import "lenis/dist/lenis.css"
 import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
@@ -7,20 +7,32 @@ import { Reveals } from "@/components/reveals"
 import { SmoothScroll } from "@/components/smooth-scroll"
 import { Starfield } from "@/components/starfield"
 import { Transitions } from "@/components/transitions"
+import { WarmWork } from "@/components/warm-work"
 import { projects } from "@/content/projects"
 import { site } from "@/content/site"
+import { resolve } from "@/lib/media"
 import "./globals.css"
 
-// Three voices: Instrument Serif for names and titles, Geist for reading,
-// Geist Mono in small capitals for labels and numbers. next/font self-hosts
-// all three with font-display: swap.
-const sans = Geist({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-geist", display: "swap" })
-const mono = Geist_Mono({ subsets: ["latin"], weight: "400", variable: "--font-geist-mono", display: "swap" })
+// Instrument Sans to read and title in, Fragment Mono (Helvetica cut to a
+// grid) in small capitals for labels, and Instrument Serif for the name on the
+// home page alone. next/font self-hosts them with font-display: swap.
+const sans = Instrument_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-instrument-sans",
+  display: "swap",
+})
 const serif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
   style: "normal",
   variable: "--font-instrument",
+  display: "swap",
+})
+const mono = Fragment_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-fragment-mono",
   display: "swap",
 })
 
@@ -52,23 +64,25 @@ export const viewport: Viewport = {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const heroes = projects.flatMap((project) => resolve(project.hero) ?? [])
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable} ${serif.variable}`}>
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
       <body className="flex flex-col">
         <Starfield />
         <SmoothScroll />
         <Reveals />
         <Transitions>
           <div id="top" tabIndex={-1} className="outline-none" />
-          <a href="#main" className="skip label">
+          <a href="#main" className="skip">
             Skip to content
           </a>
-          <Header workCount={projects.length} />
+          <Header />
           <main id="main" tabIndex={-1} className="flex-1 outline-none">
             {children}
           </main>
           <Footer />
         </Transitions>
+        <WarmWork images={heroes} />
       </body>
     </html>
   )

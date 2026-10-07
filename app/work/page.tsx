@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
-import type { CSSProperties } from "react"
-import { WorkList, type WorkItem } from "@/components/work-list"
+import { WorkCarousel, type WorkItem } from "@/components/work-carousel"
 import { period, projects } from "@/content/projects"
 import { resolve } from "@/lib/media"
 
@@ -16,20 +15,11 @@ export default function Work() {
     if (!hero) return []
     return [{ slug: project.slug, title: project.title, disciplines: project.disciplines, period: period(project), hero }]
   })
-  const first = Math.min(...projects.map((project) => project.year))
-  const last = projects.some((project) => project.ongoing) ? "Now" : Math.max(...projects.map((project) => project.year))
 
   return (
-    <div className="frame page-top">
-      <header className="cols label">
-        <h1 className="reveal t1">Selected work</h1>
-        <p className="reveal t2 mt-1 text-grey md:mt-0" style={{ "--i": 1 } as CSSProperties}>
-          {items.length} projects, {first}–{last}
-        </p>
-      </header>
-      <div className="mt-6 md:mt-10">
-        <WorkList items={items} />
-      </div>
-    </div>
+    <>
+      <h1 className="sr-only">Work</h1>
+      <WorkCarousel items={items} />
+    </>
   )
 }

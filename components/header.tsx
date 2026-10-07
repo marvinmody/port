@@ -6,12 +6,19 @@ import { Link } from "@/components/transitions"
 import { site } from "@/content/site"
 
 const trim = (path: string) => path.replace(/(.)\/$/, "$1")
-const pad = (n: number) => String(n).padStart(2, "0")
 
-// Four entries on the thirds of the grid, the last flush right. The page
-// you're on is grey. The header steps out of the way while you read down a
-// page and returns as soon as you scroll back up.
-export function Header({ workCount }: { workCount: number }) {
+const nav = [
+  { label: "Work", href: "/work/", place: "md:col-start-5 md:col-span-4" },
+  { label: "About", href: "/about/", place: "md:col-start-9 md:col-span-3" },
+  { label: "Contact", href: "/contact/", place: "md:col-start-12 md:justify-self-end" },
+]
+
+// The name and three places, on the thirds of the grid. On the home page the
+// name steps aside: it's already in the middle of the screen. The section
+// you're in is grey. On a page that reads downwards the header steps out of
+// the way as you go and returns when you scroll back up; on a page that moves
+// sideways (components/rail.tsx) it simply stays.
+export function Header() {
   const pathname = trim(usePathname())
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -20,6 +27,12 @@ export function Header({ workCount }: { workCount: number }) {
     let last = window.scrollY
     const onScroll = () => {
       const y = window.scrollY
+      if (document.documentElement.dataset.flow === "horizontal") {
+        setScrolled(false)
+        setHidden(false)
+        last = y
+        return
+      }
       setScrolled(y > 8)
       if (Math.abs(y - last) < 8) return
       setHidden(y > last && y > 240)
@@ -32,18 +45,12 @@ export function Header({ workCount }: { workCount: number }) {
 
   useEffect(() => setHidden(false), [pathname])
 
-  const nav = [
-    { label: "Work", href: "/work/", count: workCount, place: "md:col-start-5 md:col-span-4" },
-    { label: "About", href: "/about/", place: "md:col-start-9 md:col-span-3" },
-    { label: "Contact", href: "/contact/", place: "md:col-start-12 md:justify-self-end" },
-  ]
-
   return (
     <header className="site-header" data-hidden={hidden || undefined} data-scrolled={scrolled || undefined}>
       <nav aria-label="Primary" className="frame">
-        <ul className="label flex h-[var(--header)] items-center justify-between md:grid md:grid-cols-12 md:gap-x-[var(--gap)]">
+        <ul className="flex h-[var(--header)] items-center justify-between md:grid md:grid-cols-12 md:gap-x-[var(--gap)]">
           <li className="md:col-span-4">
-            <Link href="/" className="hit nav-link brand" aria-current={pathname === "/" ? "page" : undefined}>
+            <Link href="/" className="hit nav-link label brand" data-away={pathname === "/" || undefined}>
               <span className="roll">
                 <span data-text={site.name}>{site.name}</span>
               </span>
@@ -58,19 +65,11 @@ export function Header({ workCount }: { workCount: number }) {
                 <Link
                   href={item.href}
                   aria-current={page ? "page" : section ? "true" : undefined}
-                  className="hit nav-link slash"
+                  className="hit nav-link label"
                 >
                   <span className="roll">
                     <span data-text={item.label}>{item.label}</span>
                   </span>
-                  {item.count !== undefined && (
-                    <>
-                      <sup className="count" aria-hidden="true">
-                        {pad(item.count)}
-                      </sup>
-                      <span className="sr-only">, {item.count} projects</span>
-                    </>
-                  )}
                 </Link>
               </li>
             )

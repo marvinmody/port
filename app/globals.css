@@ -1,44 +1,65 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   Black ground, one ink, one grey. Three voices: Instrument Serif for names
-   and titles, Geist for reading, Geist Mono in small capitals for labels and
-   numbers. A 12-column grid whose thirds (columns 1, 5 and 9) anchor the
-   navigation and every block of content.
+   Black ground, one ink, one grey, and nothing drawn: no rules, no boxes.
+   One family to read and title in, Instrument Sans, with Fragment Mono in
+   small capitals for labels; Instrument Serif is kept for the name on the
+   home page alone. About and Contact are rails: their sections sit side by
+   side and the scroll carries you sideways through them (components/rail.tsx).
+   Work is one row of projects behind glass (components/work-carousel.tsx).
 
-   Motion is slow, short and always about where you're going. The stars drift
-   and carry you forward between pages; one page dissolves as the next rises
-   in; a project's title and image travel from the list onto its page. All of
-   it stops for prefers-reduced-motion.
+   Motion is slow, short and always about where you're going. The stars drift,
+   bend around the pointer on the home page and carry you forward between
+   pages; one page dissolves as the next rises in; a project's title and image
+   travel from the Work page onto its own and back. All of it stops for
+   prefers-reduced-motion.
    ========================================================================== */
 
 :root {
   --bg: #000;
   --fg: #ececec;
   --grey: #808080; /* 5.3:1 on black: the lowest contrast used for text */
-  --line: #1c1c1c; /* hairlines */
-  --line-strong: #3a3a3a;
+  --underline: #3a3a3a; /* the resting line under a link in text */
 
   --m: 16px; /* outer margin */
   --gap: 16px; /* column gap */
   --header: 56px;
+  /* Where a page's content starts: clear of the header, with air that
+     shrinks on a short screen (a phone on its side). */
+  --top: calc(var(--header) + clamp(40px, 10vh, 80px));
 
-  /* Reading text: 12.5px on phones, 13px on laptops, 13.5px on large screens. */
-  --fs: clamp(12.5px, 0.1vw + 11.6px, 13.5px);
-  /* Labels: Geist Mono in capitals. */
+  /* Reading text: 15px on phones, which are held close and read on the move;
+     13–14px from 768px. */
+  --fs: 15px;
+  /* Labels: Fragment Mono in capitals. */
   --fs-label: 11px;
   /* Opening statements. */
-  --fs-lead: clamp(16px, 0.35vw + 12px, 19px);
-  /* Serif: list titles and figures, project titles, the name. */
-  --display: clamp(26px, 1.1vw + 16px, 36px);
-  --title: clamp(36px, 2vw + 18px, 52px);
-  --name: clamp(36px, 1.8vw + 22px, 56px);
+  --fs-lead: 18px;
+  /* Titles, in the sans: on the Work page, then a project's own. */
+  --display: clamp(22px, 0.7vw + 14px, 30px);
+  --title: clamp(30px, 1.5vw + 16px, 44px);
+  /* The name on the home page, the one place for the serif. */
+  --name: clamp(40px, 2.6vw + 22px, 68px);
+
+  /* Where a rail's sections start, below the header. */
+  --rail-top: calc(var(--header) + clamp(64px, 14vh, 152px));
+  /* A project's image, at least: sized so the whole page fits one screen. It
+     grows into any room left over (components/back-out.tsx). */
+  --project-h: clamp(180px, 46vh, 540px);
 
   /* Long, soft landings for things arriving; a firm in-out for things moving. */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-io: cubic-bezier(0.76, 0, 0.24, 1);
 
   color-scheme: dark;
+}
+
+@media (width >= 48rem) {
+  :root {
+    --fs: clamp(13px, 0.1vw + 12px, 14px);
+    --fs-lead: clamp(17px, 0.35vw + 13px, 20px);
+    --top: calc(var(--header) + clamp(48px, 16vh, 144px));
+  }
 }
 
 @media (width >= 64rem) {
@@ -53,14 +74,13 @@
   --color-bg: var(--bg);
   --color-fg: var(--fg);
   --color-grey: var(--grey);
-  --color-line: var(--line);
   --color-transparent: transparent;
   --color-current: currentColor;
 
   --font-*: initial;
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-mono: var(--font-fragment-mono), ui-monospace, monospace;
 }
 
 @theme {
@@ -75,7 +95,7 @@
     background: var(--bg);
     color: var(--fg);
     scrollbar-gutter: stable;
-    scrollbar-color: var(--line-strong) transparent;
+    scrollbar-color: var(--underline) transparent;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
@@ -145,7 +165,7 @@
   }
 }
 
-/* The three thirds. They stack on phones. */
+/* The first third, and everything right of it. They stack on phones. */
 @utility t1 {
   grid-column: 1 / -1;
 
@@ -154,23 +174,6 @@
   }
 }
 
-@utility t2 {
-  grid-column: 1 / -1;
-
-  @media (width >= 48rem) {
-    grid-column: 5 / span 4;
-  }
-}
-
-@utility t3 {
-  grid-column: 1 / -1;
-
-  @media (width >= 48rem) {
-    grid-column: 9 / span 4;
-  }
-}
-
-/* Everything right of the first third. */
 @utility t23 {
   grid-column: 1 / -1;
 
@@ -181,11 +184,7 @@
 
 /* Content clears the fixed header with room to breathe. */
 @utility page-top {
-  padding-top: calc(var(--header) + 80px);
-
-  @media (width >= 48rem) {
-    padding-top: calc(var(--header) + 144px);
-  }
+  padding-top: var(--top);
 }
 
 /* ==========================================================================
@@ -196,8 +195,8 @@
   font-family: var(--font-mono);
   font-size: var(--fs-label);
   font-weight: 400;
-  line-height: 1.45;
-  letter-spacing: 0.02em;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
@@ -208,21 +207,23 @@
   text-wrap: pretty;
 }
 
+/* Titles are the reading face, larger and drawn in a little: the same voice
+   raised, not a second one. */
 @utility display {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: var(--display);
   font-weight: 400;
-  line-height: 1.04;
-  letter-spacing: -0.01em;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
-/* A project's own title is set larger than in the list it carries over from. */
+/* A project's own title is set larger than on the Work page it carries over from. */
 @utility title {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: var(--title);
   font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.015em;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
 }
 
 @utility name {
@@ -240,17 +241,6 @@
   margin-block: -14px;
 }
 
-/* "/ Label": the slash that marks the navigation. */
-@utility slash {
-  &::before {
-    content: "/";
-    content: "/" / "";
-    display: inline-block;
-    margin-right: 0.55em;
-    color: var(--grey);
-  }
-}
-
 /* ==========================================================================
    Links. Labels roll to a fresh copy of themselves; links inside text draw
    a line from the left and retract it to the right.
@@ -261,9 +251,21 @@
     transition: color 0.3s;
   }
 
-  /* The section you're in. The name stays ink: it's the way home, not a place. */
-  .nav-link:not(.brand)[aria-current] {
+  /* The section you're in. */
+  .nav-link[aria-current] {
     color: var(--grey);
+  }
+
+  /* On the home page the name steps aside: it's already in the middle. */
+  .brand {
+    transition:
+      opacity 0.6s var(--ease),
+      visibility 0.6s;
+  }
+
+  .brand[data-away] {
+    opacity: 0;
+    visibility: hidden;
   }
 
   .roll {
@@ -286,18 +288,25 @@
     left: 0;
   }
 
-  .count {
-    margin-left: 0.35em;
-    font-size: 8px;
-    color: var(--grey);
-  }
-
   .line-link {
     padding-bottom: 1px;
     background:
       linear-gradient(currentColor, currentColor) no-repeat right 100% / 0 1px,
-      linear-gradient(var(--line-strong), var(--line-strong)) no-repeat 0 100% / 100% 1px;
+      linear-gradient(var(--underline), var(--underline)) no-repeat 0 100% / 100% 1px;
     transition: background-size 0.6s var(--ease-io);
+  }
+
+  /* A finger needs more than a line of small text to aim at. */
+  @media (pointer: coarse) {
+    .line-link {
+      position: relative;
+    }
+
+    .line-link::after {
+      content: "";
+      position: absolute;
+      inset: -12px -6px;
+    }
   }
 
   @media (hover: hover) {
@@ -320,7 +329,7 @@
     z-index: 100;
     top: 8px;
     left: var(--m);
-    padding: 12px 16px;
+    padding: 10px 14px;
     background: var(--fg);
     color: var(--bg);
     transform: translateY(-200%);
@@ -381,29 +390,28 @@
     translate: 0 calc(-100% - 48px);
   }
 
-  /* The home page is a single screen. */
-  body:has(.home) .site-footer {
-    display: none;
-  }
-
   .site-footer {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
     margin-top: 128px;
   }
 
-  @media (width >= 48rem) {
-    .site-footer {
-      margin-top: 192px;
-    }
+  /* The home page is a single screen. */
+  body:has(.home) .site-footer {
+    display: none;
   }
 }
 
 /* ==========================================================================
    Entrances. .reveal for what's on screen when a page arrives, .in-view
-   for what scrolls up into it later, letters for the name.
+   for what comes into view later (from below, or from the right on a rail),
+   letters for the name.
 
    Every animation on the site moves only opacity and transforms, which the
-   GPU composites on its own: no blur, no clip-path, nothing that makes the
-   browser repaint or re-layout mid-flight.
+   GPU composites on its own: nothing makes the browser repaint or re-layout
+   mid-flight. Fill "backwards" only: hidden while waiting to start, and once
+   finished the animation lets go, so hover moves on the same element glide.
    ========================================================================== */
 
 @keyframes rise {
@@ -428,18 +436,18 @@
 
 @layer components {
   .reveal {
-    animation: rise 1.1s var(--ease) both;
+    animation: rise 1.1s var(--ease) backwards;
     animation-delay: calc(140ms + var(--i, 0) * 70ms);
   }
 
   .reveal-media {
-    animation: rise 1.2s var(--ease) both;
+    animation: rise 1.2s var(--ease) backwards;
     animation-delay: calc(140ms + var(--i, 0) * 70ms);
   }
 
   .reveal-media picture {
     display: block;
-    animation: settle 1.8s var(--ease) both;
+    animation: settle 1.8s var(--ease) backwards;
     animation-delay: calc(140ms + var(--i, 0) * 70ms);
   }
 
@@ -447,6 +455,7 @@
     transition:
       opacity 1.1s var(--ease),
       translate 1.3s var(--ease);
+    transition-delay: calc(var(--i, 0) * 70ms);
   }
 
   @media (scripting: enabled) {
@@ -458,7 +467,7 @@
 
   .letter {
     display: inline-block;
-    animation: letter-in 1.5s var(--ease) both;
+    animation: letter-in 1.5s var(--ease) backwards;
     animation-delay: calc(220ms + var(--d) * 60ms);
     transition: transform 0.9s var(--ease);
   }
@@ -471,22 +480,88 @@
   }
 }
 
-/* Images drift a little slower than the page, inside their frames. */
-@supports (animation-timeline: view()) {
-  @keyframes drift {
-    from {
-      translate: 0 -2.4%;
-    }
-    to {
-      translate: 0 2.4%;
+/* ==========================================================================
+   Rails (components/rail.tsx). Stacked by default; side by side on screens
+   wide and tall enough, when motion is welcome. This media query must match
+   HORIZONTAL in rail.tsx.
+   ========================================================================== */
+
+@layer components {
+  .rail-track {
+    padding: var(--top) var(--m) 0;
+  }
+
+  .panel + .panel {
+    margin-top: 72px;
+  }
+
+  .panel-text {
+    max-width: 40rem;
+  }
+
+  @media (width >= 48rem) {
+    .panel + .panel {
+      margin-top: 112px;
     }
   }
 
-  .drift {
-    scale: 1.05;
-    animation: drift linear both;
-    animation-timeline: view();
-    animation-range: cover;
+  @media (scripting: enabled) and (width >= 48rem) and (height >= 35rem) and (prefers-reduced-motion: no-preference) {
+    .rail-view {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      /* clip, not hidden: focus can't scroll it, the rail decides what shows. */
+      overflow: clip;
+      container-type: inline-size;
+    }
+
+    .rail-track {
+      /* One of the page's twelve columns, as on every other page. */
+      --col: calc((100cqw - 2 * var(--m) - 11 * var(--gap)) / 12);
+      /* Below 64rem a third is too narrow to read: every section takes half
+         again as many columns (a third becomes a half). */
+      --span-scale: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--gap);
+      width: max-content;
+      height: 100%;
+      /* Room after the last section, so the row ends rather than stops. */
+      padding: var(--rail-top) max(var(--m), 22vw) 0 var(--m);
+      /* It moves every frame you scroll: its own layer, never repainted. */
+      will-change: transform;
+    }
+
+    /* Sections are whole columns wide (--span of twelve, a third by
+       default), so at rest they sit on the same grid as the header. The
+       padding keeps air between neighbours' text. */
+    .panel {
+      --cols: calc(var(--span, 4) * var(--span-scale));
+      flex: none;
+      width: calc(var(--cols) * var(--col) + (var(--cols) - 1) * var(--gap));
+      max-width: none;
+      padding-right: calc(var(--gap) * 2);
+    }
+
+    .panel + .panel {
+      margin-top: 0;
+    }
+
+    /* Sections come in from the right on a rail. */
+    .in-view:not([data-shown]) {
+      translate: 48px 0;
+    }
+
+    @media (width >= 64rem) {
+      .rail-track {
+        --span-scale: 1;
+      }
+    }
+
+    /* A rail ends at its last section; the footer belongs to pages that scroll down. */
+    body:has(.rail) .site-footer {
+      display: none;
+    }
   }
 }
 
@@ -495,48 +570,41 @@
    ========================================================================== */
 
 @layer components {
-  /* A Swiss row: hairline, label on the first third, content beside it. */
-  .row {
-    margin-top: 56px;
-    padding-top: 16px;
-    border-top: 1px solid var(--line);
-  }
-
-  .row:first-child {
-    margin-top: 0;
-  }
-
-  @media (width >= 48rem) {
-    .row {
-      margin-top: 80px;
-      padding-top: 20px;
-    }
-  }
-
-  .hero,
-  .frame-img {
-    overflow: hidden;
-  }
-
-  .next-link .display {
+  /* Logos (components/logo.tsx), set by height against the text they sit
+     with. Each rests on the text's baseline like a word would. */
+  .logo {
     display: inline-block;
+    flex: none;
+    width: auto;
   }
 
-  .next-arrow {
-    display: inline-block;
-    margin-left: 0.3em;
-    opacity: 0;
-    translate: -0.5em 0;
-    transition:
-      opacity 0.5s var(--ease),
-      translate 0.8s var(--ease);
+  /* Pure white, eased to the ink so it doesn't outshine the words. */
+  .logo-zebra {
+    opacity: 0.92;
   }
 
-  @media (hover: hover) {
-    .next-link:hover .next-arrow {
-      opacity: 1;
-      translate: 0 0;
-    }
+  .entry-name {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  /* About as tall as the capitals beside it. */
+  .entry-logo.logo-phasm {
+    height: 11px;
+  }
+
+  /* Its letters are half its height: at 19px they match the capitals of the
+     text, and the pull-down sets their foot on the baseline. */
+  .entry-logo.logo-zebra {
+    height: 19px;
+    margin-bottom: -5px;
+  }
+
+  .project-logo {
+    display: block;
+    height: clamp(18px, 0.6vw + 13px, 24px);
+    margin-bottom: 20px;
   }
 
   .copy {
@@ -546,6 +614,40 @@
   @media (hover: hover) {
     .copy:hover {
       color: var(--grey);
+    }
+  }
+
+  /* The hint only shows when it's useful: on hover, on focus, or to confirm. */
+  .copy-hint {
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .copy-email:hover .copy-hint,
+  .copy-email:focus-within .copy-hint,
+  .copy-email[data-copied] .copy-hint {
+    opacity: 1;
+  }
+
+  /* Without hover there's no other way to learn it: always shown. */
+  @media (hover: none) {
+    .copy-hint {
+      opacity: 1;
+    }
+  }
+
+  /* Words for a pointer, or for a finger. */
+  .hint-touch {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .hint-fine {
+      display: none;
+    }
+
+    .hint-touch {
+      display: inline;
     }
   }
 
@@ -580,216 +682,377 @@
 }
 
 /* ==========================================================================
-   Work: the index. Rows on the first two thirds, the preview on the last.
+   Work: every project in one row, behind a pane of glass that's never drawn
+   (components/work-carousel.tsx, components/flex-carousel.tsx). The row
+   bends where it meets the glass's edge. Under the middle card, its title
+   (a link to it) and one line of facts; along the bottom edge, the count and
+   a hint. Without WebGL2 or script, the projects are a plain list instead.
    ========================================================================== */
 
-@keyframes frame-in {
-  from {
-    translate: 0 var(--in);
-  }
-}
-
-@keyframes image-in {
-  from {
-    translate: 0 calc(var(--in) * -1);
-  }
-}
-
 @layer components {
-  .work-list,
-  .work-row,
-  .work-link {
-    display: grid;
-    grid-template-columns: subgrid;
-    grid-column: 1 / -1;
-  }
-
-  .work-list {
-    border-bottom: 1px solid var(--line);
-  }
-
-  @media (width >= 48rem) {
-    .work-list {
-      grid-column: 1 / span 8;
-    }
-  }
-
-  .work-row {
+  .work {
     position: relative;
-    border-top: 1px solid var(--line);
-    transition:
-      opacity 0.5s var(--ease),
-      translate 0.6s var(--ease);
   }
 
-  /* The rule that draws across a chosen row. */
-  .work-row::after {
-    content: "";
+  .flex-carousel {
     position: absolute;
-    right: 0;
-    bottom: -1px;
-    left: 0;
-    height: 1px;
-    background: var(--fg);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.5s var(--ease-io);
+    inset: 0;
+    overflow: hidden;
+    /* The row fades out at the screen's edges rather than being cut by them. */
+    mask-image: linear-gradient(90deg, transparent, #000 min(72px, 6%), #000 calc(100% - min(72px, 6%)), transparent);
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: contain;
   }
 
-  .work-link {
-    align-items: baseline;
-    row-gap: 6px;
-    padding-block: 16px 18px;
+  .flex-carousel[data-hover] {
+    cursor: pointer;
   }
 
-  .work-index {
-    grid-column: 1;
-    color: var(--grey);
-    transition: color 0.4s;
+  .flex-carousel[data-dragging] {
+    cursor: grabbing;
   }
 
-  .work-title-wrap {
-    grid-column: 2 / -1;
+  /* Stands in for a card while a page transition carries its image. The
+     card shows its whole picture, as this does, so the two swap unseen. */
+  .work-carry {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(var(--card-h) * var(--ratio));
+    height: var(--card-h);
+    translate: -50% -50%;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
   }
 
+  .work-carry[data-shown] {
+    opacity: 1;
+  }
+
+  .work-carry img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Follows the middle card's lower edge, even as an opened card grows. */
+  .work-caption {
+    position: absolute;
+    inset-inline: var(--m);
+    top: calc(50% + var(--card-h, 25svh) * var(--lift, 1) / 2 + 22px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.9s var(--ease) 0.3s;
+  }
+
+  .work-caption[data-shown] {
+    opacity: 1;
+  }
+
+  /* Each new title and its facts rise into place. */
   .work-title {
-    display: inline-block;
-    transition: translate 0.8s var(--ease);
+    pointer-events: auto;
+    animation: rise 0.7s var(--ease) backwards;
   }
 
   .work-meta {
-    grid-column: 2 / span 2;
     color: var(--grey);
+    animation: rise 0.7s var(--ease) 60ms backwards;
+    transition: opacity 0.3s var(--ease);
   }
 
-  .work-year {
-    grid-column: 4;
-    color: var(--grey);
-    text-align: right;
+  .work-foot {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 24px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.9s var(--ease) 0.6s;
   }
 
-  @media (width >= 48rem) {
-    .work-link {
-      padding-block: 18px 20px;
-    }
-
-    .work-title-wrap {
-      grid-column: 2 / span 4;
-    }
-
-    .work-meta {
-      grid-column: 6 / span 2;
-    }
-
-    .work-year {
-      grid-column: 8;
-    }
+  .work-foot[data-shown] {
+    opacity: 1;
   }
 
-  .work-row[data-active] .work-index {
-    color: var(--fg);
-  }
-
-  @media (hover: hover) {
-    .work-row[data-active] .work-title {
-      translate: 12px 0;
-    }
-
-    .work-list:has([data-active]) .work-row:not([data-active]) {
-      opacity: 0.32;
+  /* No room for both under a short screen's cards: the caption stays. */
+  @media (height < 32rem) {
+    .work-foot {
+      display: none;
     }
   }
 
-  /* Choosing: the rule draws, and the rest of the list parts around the chosen
-     row (rows above drift up, rows below drift down) as it fades. */
+  /* Choosing: everything but the chosen card and its title steps back. */
   .work[data-choosing] {
     pointer-events: none;
   }
 
-  .work-row[data-chosen]::after {
-    transform: scaleX(1);
-  }
-
-  .work[data-choosing] .work-row:not([data-chosen]) {
+  .work[data-choosing] .work-foot,
+  .work[data-choosing] .work-meta {
     opacity: 0;
-    translate: 0 calc(var(--side, 0) * 12px);
-    transition-duration: 0.4s;
-    transition-delay: calc(var(--d) * 30ms);
+    transition-delay: 0s;
+    transition-duration: 0.3s;
   }
 
-  .work-preview {
-    display: none;
+  /* A count on reels: each digit rolls to its new value. */
+  .digits {
+    display: inline-flex;
+    height: 1.5em;
+    overflow: hidden;
+    vertical-align: top;
   }
 
-  @media (width >= 48rem) {
-    .work-preview {
-      position: sticky;
-      top: calc(var(--header) + 32px);
-      display: block;
-      grid-column: 9 / -1;
-      align-self: start;
-    }
-  }
-
-  /* Each image waits outside its window. Moving down the list wipes the next
-     one up from below and sends the last one out at the top, and the reverse.
-     The wipe is two opposite translations, the frame one way and the image
-     the other, so the picture holds still while its window moves: transforms
-     only, nothing to repaint. */
-  .work-preview {
-    --in: 100%;
-  }
-
-  .work-preview[data-from="above"] {
-    --in: -100%;
-  }
-
-  /* Each image remembers which way it left, so a change of direction never
-     moves the ones already out of sight. */
-  .work-shot {
-    --out: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+  .digit {
+    display: block;
+    height: 1.5em;
     overflow: hidden;
   }
 
-  .work-shot[data-exit="up"] {
-    --out: -100%;
+  .reel {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.6s var(--ease);
   }
 
-  .work-shot-frame {
-    height: 100%;
+  .reel > span {
+    height: 1.5em;
+  }
+
+  /* The list: on screen only without WebGL2 or script. */
+  .work-index {
+    display: grid;
+    gap: 72px;
+    padding: var(--top) var(--m) 0;
+  }
+
+  .work-index-link {
+    display: block;
+    max-width: 56rem;
+  }
+
+  .work-index-media {
+    display: block;
     overflow: hidden;
-    translate: 0 var(--out);
-    transition: translate 0.75s var(--ease-io);
   }
 
-  .work-shot-img {
+  .work-index-media img {
     display: block;
     width: 100%;
     height: auto;
-    translate: 0 calc(var(--out) * -1);
-    scale: 1.12;
-    transition:
-      translate 0.75s var(--ease-io),
-      scale 1.2s var(--ease);
   }
 
-  /* Arriving is an animation from the side the pointer came from. No
-     translate transition here: a running transition would outrank it. */
-  .work-shot[data-on] .work-shot-frame {
-    translate: 0 0;
-    transition: none;
-    animation: frame-in 0.75s var(--ease-io) both;
+  .work-index-title {
+    display: block;
+    margin-top: 16px;
   }
 
-  .work-shot[data-on] .work-shot-img {
-    translate: 0 0;
-    scale: 1;
-    transition: scale 1.2s var(--ease);
-    animation: image-in 0.75s var(--ease-io) both;
+  @media (scripting: enabled) {
+    .work:not([data-gl="off"]) {
+      height: 100svh;
+      min-height: 320px;
+      overflow: hidden;
+    }
+
+    /* Still read by screen readers, and still loading the row's images. */
+    .work:not([data-gl="off"]) .work-index {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* One screen, like the home page. */
+    body:has(.work:not([data-gl="off"])) .site-footer {
+      display: none;
+    }
+  }
+}
+
+/* ==========================================================================
+   A project: everything on one screen, so it never needs scrolling; a scroll
+   steps back out to Work (components/back-out.tsx). The title, sentence and
+   facts sit beside the image, the story runs in columns beneath, the next
+   project closes it. Stacked and scrolling where a screen is too small, or
+   if the content won't fit after all (data-overflow). This media query must
+   match FITS in back-out.tsx.
+   ========================================================================== */
+
+@layer components {
+  .project {
+    padding: var(--top) var(--m) 0;
+  }
+
+  .project-image {
+    display: block;
+    overflow: hidden;
+    width: 100%;
+    margin-top: 48px;
+    aspect-ratio: var(--ratio);
+  }
+
+  .project-story {
+    max-width: 40rem;
+    margin-top: 48px;
+    orphans: 2;
+    widows: 2;
+  }
+
+  .project-story p + p {
+    margin-top: 12px;
+  }
+
+  .project-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+    margin-top: 64px;
+  }
+
+  /* The next title, small: it grows into that page's title. */
+  .next-title {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    letter-spacing: -0.012em;
+    text-transform: none;
+    transition: translate 0.8s var(--ease);
+  }
+
+  @media (hover: hover) {
+    .next-link:hover .next-title {
+      translate: 6px 0;
+    }
+  }
+
+  .project-hint {
+    display: none;
+  }
+
+  @media (width >= 48rem) and (height >= 35rem) {
+    .project:not([data-overflow]) {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      column-gap: var(--gap);
+      height: 100svh;
+      overflow: hidden;
+      padding: calc(var(--header) + 4vh) var(--m) 20px;
+    }
+
+    .project:not([data-overflow]) > .project-intro {
+      grid-column: 1 / span 4;
+      grid-row: 1;
+      padding-right: var(--gap);
+    }
+
+    /* As tall as the screen allows, never wider than its columns. */
+    .project:not([data-overflow]) > .project-image {
+      grid-column: 5 / -1;
+      grid-row: 1;
+      justify-self: start;
+      width: min(100%, calc(var(--project-h) * var(--ratio)));
+      margin: 0;
+    }
+
+    /* A column per paragraph, read left to right, each one whole, on the
+       page's own columns: halves, then thirds under the header's places (a
+       quarter each when there are four). The padding keeps air between them. */
+    .project:not([data-overflow]) > .project-story {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-column: 1 / -1;
+      grid-row: 3;
+      gap: 24px var(--gap);
+      align-items: start;
+      max-width: none;
+      margin: 4vh 0 0;
+    }
+
+    .project:not([data-overflow]) > .project-story p {
+      grid-column: span 6;
+      padding-right: var(--gap);
+    }
+
+    .project:not([data-overflow]) > .project-story p + p {
+      margin-top: 0;
+    }
+
+    .project:not([data-overflow]) > .project-foot {
+      grid-column: 1 / -1;
+      grid-row: 4;
+      margin-top: 3vh;
+    }
+
+    .project:not([data-overflow]) .project-hint {
+      display: inline;
+    }
+
+    .project:not([data-overflow]) .project-back {
+      display: none;
+    }
+
+    body:has(.project:not([data-overflow])) .site-footer {
+      display: none;
+    }
+  }
+
+  /* Taller than wide (a tablet upright): the image goes under the intro,
+     across the full width. */
+  @media (width >= 48rem) and (height >= 35rem) and (orientation: portrait) {
+    .project:not([data-overflow]) {
+      grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    }
+
+    .project:not([data-overflow]) > .project-intro {
+      grid-column: 1 / span 8;
+      padding-right: 0;
+    }
+
+    .project:not([data-overflow]) > .project-image {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      margin-top: 4vh;
+    }
+
+    .project:not([data-overflow]) > .project-story {
+      grid-row: 4;
+    }
+
+    .project:not([data-overflow]) > .project-foot {
+      grid-row: 5;
+    }
+  }
+
+  @media (width >= 64rem) and (height >= 35rem) {
+    .project:not([data-overflow]) > .project-story p {
+      grid-column: span 4;
+    }
+  }
+
+  @media (width >= 80rem) and (height >= 35rem) {
+    .project:not([data-overflow]) > .project-story:has(> p:nth-child(4)) p {
+      grid-column: span 3;
+    }
   }
 }
 
@@ -848,7 +1111,9 @@
 }
 
 /* ==========================================================================
-   Reduced motion: everything arrives in place.
+   Reduced motion: everything arrives in place, and rails stack. The Work
+   row still moves when you move it, without the liquid, and its entrance is
+   a fade (components/flex-carousel.tsx).
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -862,14 +1127,9 @@
   .reveal-media,
   .reveal-media picture,
   .letter,
-  .drift,
-  .work-shot-frame,
-  .work-shot-img {
+  .work-title,
+  .work-meta {
     animation: none !important;
-  }
-
-  .drift {
-    scale: none;
   }
 
   .in-view,
@@ -880,10 +1140,9 @@
   }
 
   .site-header,
-  .work-row,
-  .work-title,
-  .work-shot-frame,
-  .work-shot-img,
+  .work-caption,
+  .work-foot,
+  .reel,
   .roll > span {
     transition: none !important;
   }

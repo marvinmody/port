@@ -18,8 +18,9 @@ const legacyCopy = (text: string) => {
   return ok
 }
 
-// The address in full; clicking copies it. The hint beneath rolls over to
-// "Copied" for 1.6s and the change is announced to screen readers.
+// The address in full; clicking copies it. A hint beneath it (on hover or
+// focus; always, on touch screens) rolls over to "Copied" for 1.6s; the change
+// is announced to screen readers.
 export function CopyEmail({ email }: { email: string }) {
   const [copied, setCopied] = useState(false)
   const timer = useRef(0)
@@ -44,7 +45,7 @@ export function CopyEmail({ email }: { email: string }) {
   }
 
   return (
-    <div>
+    <div className="copy-email" data-copied={copied || undefined}>
       <button
         type="button"
         onClick={copy}
@@ -56,13 +57,13 @@ export function CopyEmail({ email }: { email: string }) {
       <span id="copy-hint" className="sr-only">
         Copies the address to your clipboard
       </span>
-      <p className="label mt-1 text-grey" aria-hidden="true">
+      <p className="copy-hint label mt-1 text-grey" aria-hidden="true">
         <span className="swap" data-on={copied || undefined}>
           <span>
-            <span className="[@media(hover:none)]:hidden">Click to copy</span>
-            <span className="hidden [@media(hover:none)]:inline">Tap to copy</span>
+            <span className="hint-fine">Click to copy</span>
+            <span className="hint-touch">Tap to copy</span>
           </span>
-          <span className="text-fg">Copied to clipboard</span>
+          <span className="text-fg">Copied</span>
         </span>
       </p>
       <p className="sr-only" aria-live="polite">

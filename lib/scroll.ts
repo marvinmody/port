@@ -9,10 +9,17 @@ export const setLenis = (instance: Lenis | null) => {
 
 export const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
-export function scrollToTop(immediate = false) {
+/** Scrolls the page to `y`: a Lenis glide, or a jump when `immediate`. */
+export function scrollToY(y: number, immediate = false) {
+  const jump = immediate || prefersReducedMotion()
   if (lenis) {
-    lenis.scrollTo(0, { immediate: immediate || prefersReducedMotion(), force: true })
+    // Just after a page change Lenis may still hold the last page's height
+    // and clamp to it; measure first.
+    lenis.resize()
+    lenis.scrollTo(y, { immediate: jump, force: true })
     return
   }
-  window.scrollTo({ top: 0, behavior: immediate || prefersReducedMotion() ? "instant" : "smooth" })
+  window.scrollTo({ top: y, behavior: jump ? "instant" : "smooth" })
 }
+
+export const scrollToTop = (immediate = false) => scrollToY(0, immediate)
