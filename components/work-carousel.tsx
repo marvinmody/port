@@ -24,7 +24,7 @@ import { Picture } from "@/components/picture"
 import { landed, Link, useNavigate } from "@/components/transitions"
 import { drift } from "@/lib/drift"
 import { HERO_SIZES, type Resolved } from "@/lib/media"
-import { lastProject, openProject, viewed } from "@/lib/recent"
+import { justFlew, lastProject, openProject, viewed } from "@/lib/recent"
 import { prefersReducedMotion } from "@/lib/scroll"
 
 export type WorkItem = {
@@ -85,10 +85,11 @@ export function WorkCarousel({ items }: { items: WorkItem[] }) {
   const carousel = useRef<FlexHandle>(null)
 
   // Open on the project you last looked at. If its page is still on screen
-  // while this renders, you're coming straight back from it.
+  // while this renders, you're coming straight back from it. Straight from
+  // the home page's flight through the name, the row arrives from ahead.
   const [start] = useState(() => {
     const index = Math.max(0, items.findIndex((item) => item.slug === lastProject()))
-    return { index, returning: openProject() === items[index].slug }
+    return { index, returning: openProject() === items[index].slug, flown: justFlew() }
   })
   const [active, setActive] = useState(start.index)
   const [sources, setSources] = useState<HTMLImageElement[] | null>(null)
@@ -312,7 +313,7 @@ export function WorkCarousel({ items }: { items: WorkItem[] }) {
           ref={carousel}
           items={flexItems}
           {...GLASS}
-          intro={start.returning ? "bloom" : "rise"}
+          intro={start.returning ? "bloom" : start.flown ? "arrive" : "rise"}
           initial={start.index}
           held={start.returning ? start.index : -1}
           onChange={onChange}

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { useEffect, useRef } from "react"
-import { bus, NAVIGATE } from "@/lib/bus"
+import { bus, FLY, NAVIGATE } from "@/lib/bus"
 import { takeDrift } from "@/lib/drift"
 import { onTick, whenIdle } from "@/lib/ticker"
 
@@ -124,6 +124,10 @@ void main() {
 const DRIFT = 0.0035
 /** How far one page change carries you. */
 const WARP = 0.05
+/** The flight from the home page to the work goes this many warps deep… */
+const FLY_WARPS = 2.4
+/** …and stands in for the page change's own warps for this long, in ms. */
+const FLY_HOLD = 1400
 /** Camera travel per viewport scrolled, in far-plane units: far stars move at
  *  5% of the page, the nearest at about half. */
 const PARALLAX = 0.1
@@ -137,7 +141,7 @@ const brightnessFor = (path: string) => (path === "/" ? 1 : 0.6)
 // The lens belongs to the home page, where the stars are the whole picture.
 const lensFor = (path: string) => (path === "/" ? 1 : 0)
 
-type Field = { warp(): void; page(path: string): void }
+type Field = { warp(): void; fly(): void; page(path: string): void }
 
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
   const shader = gl.createShader(type)
@@ -355,7 +359,16 @@ function createField(canvas: HTMLCanvasElement, still: boolean): (Field & { dest
       lastWarp = now
       travelTo += WARP
     },
+    // Through the name on the home page to the work: one long push, the
+    // length of the whole hand-off, in place of the page change's own warps.
+    fly() {
+      if (still) return
+      lastWarp = performance.now() + FLY_HOLD
+      travelTo += WARP * FLY_WARPS
+    },
     page(path) {
+      // The new page starts at its own top: not a scroll to follow.
+      lastScroll = window.scrollY
       brightTo = brightnessFor(path)
       lensTo = lensFor(path)
       if (still) {
@@ -394,7 +407,9 @@ export function Starfield() {
     })
 
     const warp = () => field.current?.warp()
+    const fly = () => field.current?.fly()
     bus?.addEventListener(NAVIGATE, warp)
+    bus?.addEventListener(FLY, fly)
 
     // A lost GPU context (driver reset, too many tabs) is rebuilt when the
     // browser hands it back.
@@ -414,6 +429,7 @@ export function Starfield() {
     return () => {
       cancelIdle()
       bus?.removeEventListener(NAVIGATE, warp)
+      bus?.removeEventListener(FLY, fly)
       element.removeEventListener("webglcontextlost", onLost)
       element.removeEventListener("webglcontextrestored", onRestored)
       current?.destroy()

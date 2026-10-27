@@ -401,6 +401,38 @@
   body:has(.home) .site-footer {
     display: none;
   }
+
+  /* ...held in place while you scroll on through it (components/home-scroll.tsx).
+     --p runs from 0 to 1: the name has gone at 1. */
+  .home {
+    --p: 0;
+    height: 200svh;
+  }
+
+  .home-stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 360px;
+    overflow: hidden;
+  }
+
+  /* Coming towards you: the name grows and thins out as you pass through
+     it, the letters furthest from the middle first (--d, set by
+     components/name.tsx), as nearer stars pass sooner. */
+  .home-name {
+    scale: calc(1 + var(--p) * var(--p) * 7);
+    opacity: calc(1 - var(--p) * var(--p));
+  }
+
+  .home-name .letter {
+    opacity: calc(1 - var(--p) * (0.7 + var(--d) * 0.14));
+  }
+
+  .home-facts {
+    opacity: calc(1 - var(--p) * 2.5);
+    translate: 0 calc(var(--p) * 32px);
+  }
 }
 
 /* ==========================================================================
@@ -1137,6 +1169,11 @@
     opacity: 1 !important;
     translate: none !important;
     transition: none !important;
+  }
+
+  /* Passing through the name becomes a fade. */
+  .home-name {
+    scale: none;
   }
 
   .site-header,

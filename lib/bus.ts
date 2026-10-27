@@ -4,3 +4,6 @@
 export const bus = typeof window === "undefined" ? null : new EventTarget()
 
 export const NAVIGATE = "navigate"
+/** The home page has begun carrying you through the name to the work: one
+ *  long push forward that covers the page change too. */
+export const FLY = "fly"

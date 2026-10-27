@@ -21,5 +21,15 @@ export function viewed(slug: string) {
   last = slug
 }
 
+let flight = Number.NEGATIVE_INFINITY
+
+/** The home page has just carried you through the name to the work. */
+export function flew() {
+  flight = performance.now()
+}
+
+/** Arriving on the Work page straight from that flight. */
+export const justFlew = () => performance.now() - flight < 1500
+
 export const lastProject = () => last
 export const openProject = () => open

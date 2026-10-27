@@ -36,6 +36,9 @@ export const landed = () => landing
 type Options = {
   /** Go back in history instead, if that's where `href` is: no new entry. */
   back?: boolean
+  /** Swap the page without a cross-fade: for when the old page has already
+   *  cleared itself away, and a still image of it would only ghost the stars. */
+  cut?: boolean
 }
 
 type Navigate = (href: string, options?: Options) => void
@@ -163,7 +166,7 @@ export function Transitions({ children }: { children: ReactNode }) {
       const back = options?.back && previous.current !== null && trim(previous.current) === trim(to)
       const go = () => (back ? router.back() : router.push(href, { scroll: false }))
 
-      if (!document.startViewTransition || prefersReducedMotion() || running.current) {
+      if (!document.startViewTransition || prefersReducedMotion() || running.current || options?.cut) {
         arrive.current = arriveAt
         go()
         return

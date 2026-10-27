@@ -99,7 +99,7 @@ const BEND_PRESETS = {
 export type Preset = keyof typeof BEND_PRESETS
 /** Rise lifts the cards in from below, bloom fades them in as the bend
  *  forms, spin lands a fast flick, deal spreads them from the middle. */
-export type Intro = "rise" | "bloom" | "spin" | "deal" | "none"
+export type Intro = "rise" | "bloom" | "arrive" | "spin" | "deal" | "none"
 /** Natural keeps each image whole; the others crop every card to one shape. */
 type Fit = "natural" | "portrait" | "square" | "landscape"
 
@@ -183,7 +183,7 @@ type Props = Partial<Lens> & {
 const FIT_ASPECT: Partial<Record<Fit, number>> = { portrait: 0.75, square: 1, landscape: 4 / 3 }
 const TAPS = 12
 const PIXEL_BUDGET = 4.5e6
-const INTRO_DURATION: Record<string, number> = { rise: 2.1, bloom: 1.6, spin: 2.2, deal: 1.5, fade: 0.35 }
+const INTRO_DURATION: Record<string, number> = { rise: 2.1, bloom: 1.6, arrive: 1.9, spin: 2.2, deal: 1.5, fade: 0.35 }
 
 const wrap = (value: number, size: number) => ((((value + size / 2) % size) + size) % size) - size / 2
 const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1)
@@ -839,6 +839,17 @@ export const FlexCarousel = forwardRef<FlexHandle, Props>(function FlexCarousel(
           const delay = Math.min(Math.abs(rel) / (width * 0.6), 1) * 0.25
           const local = easeOut((t - delay) / 0.55)
           return { alpha: local, x: 0, y: 0, scale: 0.92 + 0.08 * local }
+        }
+      } else if (kind === "arrive") {
+        // From far ahead, along the way you were already travelling: the row
+        // starts gathered and small at the middle and comes towards you,
+        // opening out, the middle card first.
+        e.strength = easeInOut((t - 0.4) / 0.6)
+        e.card = (rel) => {
+          const delay = Math.min(Math.abs(rel) / (width * 0.6), 1) * 0.2
+          const local = clamp01((t - delay) / 0.78)
+          const near = easeOutQuint(local)
+          return { alpha: clamp01(local * 2.5), x: -rel * (1 - near) * 0.85, y: 0, scale: 0.16 + 0.84 * near }
         }
       } else if (kind === "spin") {
         e.sceneAlpha = easeOut(t / 0.25)

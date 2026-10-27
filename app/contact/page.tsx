@@ -25,7 +25,7 @@ export default function Contact() {
       <section className="panel panel-text" data-panel="intro">
         <h1 className="sr-only">Contact</h1>
         <p className="reveal lead max-w-[26ch]">
-          If you’re building something that has to work in the real world, I’d like to hear about it.
+          Busyness is the most respectable way to ignore people. I try not to hide behind it.
         </p>
       </section>
       <Panel id="email" label="Email" first order={1}>

@@ -29,7 +29,7 @@ type About = {
 
 export const about: About = {
   intro:
-    "I like problems where software has to answer to something physical: an airframe carrying a load, a defect that needs a root cause, a boat finding its own way around a course.",
+    "I believe character shows in what a person refuses to accept. I try to refuse complacency, beginning with my own.",
 
   experience: [
     {
